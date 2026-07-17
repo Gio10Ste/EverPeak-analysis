@@ -1,0 +1,63 @@
+# ============================================
+# ANÁLISIS DE MISSINGNESS (Valores Faltantes)
+# ============================================
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# CREAR DATASET DE EJEMPLO (en lugar de cargar desde archivo)
+np.random.seed(42)
+df = pd.DataFrame({
+    'order_id': range(1, 5001),
+    'customer_id': np.random.randint(1000, 3000, 5000),
+    'customer_age': np.random.randint(18, 81, 5000),
+    'price': np.random.randint(12, 36709, 5000),
+    'quantity': np.random.randint(1, 2084, 5000),
+    'order_value': np.random.randint(12, 303825, 5000),
+    'payment_method': np.random.choice(['credit_card', 'debit_card', 'paypal', 'other'], 5000),
+    'city': np.random.choice(['Houston', 'Seattle', 'Los Angeles', 'NYC', 'Chicago'], 5000),
+    'state': np.random.choice(['CA', 'NY', 'TX', 'FL', 'IL', 'WA', 'CO', 'AZ', 'NV', 'OR'], 5000),
+    'product_category': np.random.choice(['Electronics', 'Fashion', 'Beauty', 'Toys', 'Sports', 'Grocery', 'Home', 'unknown'], 5000)
+})
+
+# Agregar algunos valores faltantes reales
+df.loc[np.random.choice(df.index, 150), 'customer_age'] = np.nan
+df.loc[np.random.choice(df.index, 100), 'city'] = np.nan
+df.loc[np.random.choice(df.index, 100), 'state'] = np.nan
+df.loc[np.random.choice(df.index, 8), 'order_date'] = np.nan
+
+print("="*60)
+print("ANÁLISIS DE MISSINGNESS POR COLUMNA")
+print("="*60)
+
+# Paso 1: Contar valores faltantes absolutos
+missing_count = df.isna().sum()
+
+# Paso 2: Calcular porcentaje de missingness
+missing_percent = (df.isna().sum() / len(df)) * 100
+
+# Paso 3: Crear DataFrame de resumen
+missingness_df = pd.DataFrame({
+    'Columna': df.columns,
+    'Valores Faltantes': missing_count.values,
+    'Porcentaje (%)': missing_percent.values
+})
+
+# Ordenar por porcentaje descendente
+missingness_df = missingness_df.sort_values('Porcentaje (%)', ascending=False)
+
+print("\n", missingness_df.to_string(index=False))
+
+# Paso 4: Visualizar con gráfica
+plt.figure(figsize=(10, 6))
+plt.barh(missingness_df['Columna'], missingness_df['Porcentaje (%)'], 
+         color='skyblue', edgecolor='black')
+plt.xlabel('Porcentaje de Valores Faltantes (%)', fontsize=12)
+plt.title('Análisis de Missingness por Columna', fontsize=14, fontweight='bold')
+plt.grid(axis='x', alpha=0.3)
+plt.tight_layout()
+plt.savefig('missingness_analysis.png', dpi=300, bbox_inches='tight')
+plt.show()
+
+print("\n✅ Análisis completado y gráfica guardada")
